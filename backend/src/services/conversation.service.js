@@ -114,7 +114,23 @@ async function generateResponse(userMessage, context) {
     const intent = classifyIntent(assistantText);
 
     // 6. Filter response (hard constraints)
-    assistantText = responseFilter.filter(assistantText, safetyCheck.risk_level, intent);
+    const filterResult = responseFilter.filter(
+      assistantText, 
+      safetyCheck.risk_level, 
+      intent,
+      { maxLength: parseInt(process.env.OPENAI_MAX_TOKENS) || 1000 }
+    );
+    assistantText = filterResult.text;
+    
+    // Log if response was filtered
+    if (filterResult.wasFiltered) {
+      logger.warn('Response was filtered', {
+        actions: filterResult.actions,
+        violations: filterResult.violations.length,
+        riskLevel: safetyCheck.risk_level,
+        intent
+      });
+    }
 
     // 7. Extract metadata
     const metadata = {
