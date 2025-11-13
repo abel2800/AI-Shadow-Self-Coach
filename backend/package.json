@@ -8,6 +8,8 @@
     "dev": "nodemon server.js",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:services": "jest tests/services",
+    "test:controllers": "jest tests/controllers",
     "lint": "eslint src/",
     "migrate": "sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo",
