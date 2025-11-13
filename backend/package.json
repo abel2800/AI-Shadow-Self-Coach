@@ -10,6 +10,7 @@
     "test:watch": "jest --watch",
     "test:services": "jest tests/services",
     "test:controllers": "jest tests/controllers",
+    "test:integration": "jest tests/integration",
     "lint": "eslint src/",
     "migrate": "sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo",
