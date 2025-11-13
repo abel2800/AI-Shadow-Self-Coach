@@ -1,21 +1,21 @@
 const { Sequelize } = require('sequelize');
+const { config } = require('./environment');
+
+const dbConfig = config.database;
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'shadow_coach',
-  process.env.DB_USER || 'postgres',
-  process.env.DB_PASSWORD || '',
+  dbConfig.name,
+  dbConfig.user,
+  dbConfig.password,
   {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT) || 5432,
+    host: dbConfig.host,
+    port: dbConfig.port,
     dialect: 'postgres',
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
-    ssl: process.env.DB_SSL === 'true' ? {
+    logging: config.database.logging !== undefined 
+      ? config.database.logging 
+      : (process.env.NODE_ENV === 'development' ? console.log : false),
+    pool: dbConfig.pool,
+    ssl: dbConfig.ssl ? {
       require: true,
       rejectUnauthorized: false
     } : false

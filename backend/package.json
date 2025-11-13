@@ -13,6 +13,7 @@
     "migrate:undo": "sequelize-cli db:migrate:undo",
     "migrate:status": "sequelize-cli db:migrate:status",
     "migrate:create": "sequelize-cli migration:generate --name",
+    "validate:env": "node scripts/validate-env.js",
     "seed": "node scripts/seed.js",
     "db:sync": "node scripts/sync-database.js",
     "db:create-tables": "node scripts/create-tables.js",

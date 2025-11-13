@@ -1,10 +1,25 @@
 require('dotenv').config();
+
 const http = require('http');
 const app = require('./src/app');
 const { sequelize } = require('./src/config/database');
 const WebSocketService = require('./src/services/websocket.service');
+const { config, validateConfig, getEnvironment } = require('./src/config/environment');
 
-const PORT = process.env.PORT || 3000;
+// Validate configuration on startup
+try {
+  validateConfig();
+  console.log('✅ Configuration validated');
+} catch (error) {
+  console.error('❌ Configuration validation failed:', error.message);
+  if (getEnvironment() === 'production' || getEnvironment() === 'staging') {
+    process.exit(1);
+  } else {
+    console.warn('⚠️  Continuing with invalid configuration (development mode)');
+  }
+}
+
+const PORT = config.app.port;
 
 // Test database connection
 sequelize.authenticate()
@@ -15,7 +30,7 @@ sequelize.authenticate()
     const server = http.createServer(app);
     
     // Initialize WebSocket service
-    if (process.env.ENABLE_WEBSOCKET !== 'false') {
+    if (config.websocket.enabled) {
       const wsService = new WebSocketService(server);
       console.log('✅ WebSocket service initialized');
     }
@@ -23,10 +38,13 @@ sequelize.authenticate()
     // Start server
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📝 Environment: ${process.env.NODE_ENV}`);
-      console.log(`🔗 API Base URL: ${process.env.API_BASE_URL || `http://localhost:${PORT}/api/v1`}`);
-      if (process.env.ENABLE_WEBSOCKET !== 'false') {
+      console.log(`📝 Environment: ${getEnvironment()}`);
+      console.log(`🔗 API Base URL: ${config.app.apiBaseUrl}`);
+      if (config.websocket.enabled) {
         console.log(`🔌 WebSocket URL: ws://localhost:${PORT}/ws`);
+      }
+      if (config.sentry.enabled) {
+        console.log(`📊 Sentry: Enabled`);
       }
     });
   })
