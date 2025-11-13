@@ -69,11 +69,20 @@ ai/
 
 ## 📚 Documentation
 
+**Essential Guides:**
 - **SPECIFICATION.md** - Complete technical specification
-- **API_CONTRACTS.md** - API documentation
+- **API_CONTRACTS.md** - API endpoint documentation
+- **DEVELOPER_ONBOARDING.md** - Developer setup guide
+- **USER_GUIDE.md** - User documentation
+- **HELP_CENTER.md** - Help and FAQs
+- **DEPLOYMENT_GUIDE.md** - Production deployment guide
 - **TRAINING_RECIPE.md** - ML training guide
 - **UI_WIREFRAMES.md** - Mobile UI specifications
-- **PROJECT_TODO.md** - Complete task list
+
+**Component READMEs:**
+- `backend/README.md` - Backend documentation
+- `mobile/README.md` - Mobile app documentation
+- `ml/README.md` - ML training documentation
 
 ---
 
@@ -124,13 +133,12 @@ ai/
 ## 📝 Configuration
 
 **Database:**
-- Name: `ai`
-- Password: `1992` (configured)
-- Tables: Auto-created
+- Configure in `backend/.env` file
+- See `backend/.env.example` for template
 
 **API:**
-- Base URL: `http://localhost:3000/api/v1`
-- Port: `3000`
+- Base URL: `http://localhost:3000/api/v1` (development)
+- Port: `3000` (default)
 
 ---
 
