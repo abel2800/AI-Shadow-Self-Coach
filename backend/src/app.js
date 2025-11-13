@@ -18,6 +18,7 @@ const journalRoutes = require('./routes/journal.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
 const safetyRoutes = require('./routes/safety.routes');
 const vectorstoreRoutes = require('./routes/vectorstore.routes');
+const mlModelRoutes = require('./routes/ml-model.routes');
 const swaggerRoutes = require('./routes/swagger.routes');
 
 // Import middleware
@@ -88,6 +89,7 @@ app.use('/api/v1/journal', journalRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/safety', safetyRoutes);
 app.use('/api/v1/vectorstore', vectorstoreRoutes);
+app.use('/api/v1/ml-models', mlModelRoutes);
 
 // 404 handler
 app.use((req, res) => {
