@@ -1,11 +1,13 @@
 /**
  * Logger Utility
  * Centralized logging using Winston
+ * Integrated with Sentry for error tracking
  */
 
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
+const { captureException, captureMessage } = require('../config/sentry');
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '../../logs');
@@ -42,6 +44,19 @@ const logger = winston.createLogger({
   // Don't log in test environment
   silent: process.env.NODE_ENV === 'test'
 });
+
+// Custom log method that also sends to Sentry
+const originalError = logger.error;
+logger.error = function(...args) {
+  originalError.apply(this, args);
+  
+  // Send errors to Sentry
+  if (args[0] instanceof Error) {
+    captureException(args[0], { component: 'logger' });
+  } else if (typeof args[0] === 'string') {
+    captureMessage(args[0], 'error', args[1] || {});
+  }
+};
 
 // If not in production, log to console with simple format
 if (process.env.NODE_ENV !== 'production') {

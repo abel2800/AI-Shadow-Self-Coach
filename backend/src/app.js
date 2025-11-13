@@ -6,6 +6,10 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const logger = require('./utils/logger');
 
+// Initialize Sentry before other imports
+const { initSentry } = require('./config/sentry');
+initSentry();
+
 // Import routes
 const authRoutes = require('./routes/auth.routes');
 const sessionRoutes = require('./routes/session.routes');
@@ -19,11 +23,24 @@ const swaggerRoutes = require('./routes/swagger.routes');
 // Import middleware
 const errorMiddleware = require('./middleware/error.middleware');
 const requestIdMiddleware = require('./middleware/requestId.middleware');
+const monitoringMiddleware = require('./middleware/monitoring.middleware');
+const { Sentry } = require('./config/sentry');
 
 const app = express();
 
+// Sentry request handler (must be first)
+if (process.env.ENABLE_SENTRY === 'true' && process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
+}
+
 // Request ID middleware (should be early in the chain)
 app.use(requestIdMiddleware);
+
+// Performance monitoring
+if (process.env.ENABLE_SENTRY === 'true' && process.env.SENTRY_DSN) {
+  app.use(monitoringMiddleware);
+}
 
 // Security middleware
 app.use(helmet());
@@ -83,16 +100,29 @@ app.use((req, res) => {
   });
 });
 
+// Sentry error handler (before custom error handler)
+if (process.env.ENABLE_SENTRY === 'true' && process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler());
+}
+
 // Error handling middleware (must be last)
 app.use(errorMiddleware);
 
 // Log unhandled errors
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  if (process.env.ENABLE_SENTRY === 'true' && process.env.SENTRY_DSN) {
+    const { captureException } = require('./config/sentry');
+    captureException(reason, { component: 'unhandled-rejection' });
+  }
 });
 
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception:', error);
+  if (process.env.ENABLE_SENTRY === 'true' && process.env.SENTRY_DSN) {
+    const { captureException } = require('./config/sentry');
+    captureException(error, { component: 'uncaught-exception' });
+  }
   process.exit(1);
 });
 

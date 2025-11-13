@@ -2,15 +2,34 @@
  * Global error handling middleware
  */
 const logger = require('../utils/logger');
+const { captureException, setUser } = require('../config/sentry');
 
 function errorHandler(err, req, res, next) {
+  // Set user context for Sentry
+  if (req.user) {
+    setUser(req.user);
+  }
+
+  // Log error
   logger.error('Error:', {
     message: err.message,
     stack: err.stack,
     path: req.path,
     method: req.method,
-    statusCode: err.statusCode || 500
+    statusCode: err.statusCode || 500,
+    requestId: req.id
   });
+
+  // Capture in Sentry (only for server errors, not client errors)
+  if (err.statusCode >= 500 || !err.statusCode) {
+    captureException(err, {
+      component: 'error-middleware',
+      requestId: req.id,
+      path: req.path,
+      method: req.method,
+      userId: req.user?.id,
+    });
+  }
 
   // Sequelize validation errors
   if (err.name === 'SequelizeValidationError') {
