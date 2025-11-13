@@ -103,7 +103,7 @@ describe('Response Filter', () => {
       const response = 'What happened next?';
       const result = responseFilter.filter(response, 'none', 'probe_story');
 
-      expect(resultFilter.hasValidation(result.text)).toBe(true);
+      expect(responseFilter.hasValidation(result.text)).toBe(true);
       expect(result.actions).toContain('added_validation');
     });
 
