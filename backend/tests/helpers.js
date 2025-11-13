@@ -1,6 +1,8 @@
 /**
  * Test Helpers
  * Utility functions for tests
+ * 
+ * Note: For comprehensive test data creation, use factories from tests/factories/
  */
 
 const { User, Session } = require('../src/models');
@@ -9,6 +11,7 @@ const bcrypt = require('bcryptjs');
 
 /**
  * Create a test user
+ * @deprecated Use createTestUserWithToken from factories instead
  */
 async function createTestUser(email = 'test@example.com', password = 'password123') {
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,6 +34,7 @@ function generateAuthToken(user) {
 
 /**
  * Create a test session
+ * @deprecated Use createCompleteSession from factories instead
  */
 async function createTestSession(userId, sessionType = 'gentle_deep') {
   return await Session.create({
@@ -42,6 +46,7 @@ async function createTestSession(userId, sessionType = 'gentle_deep') {
 
 /**
  * Clean up test data
+ * @deprecated Use cleanupTestData from factories instead
  */
 async function cleanupTestData() {
   await Session.destroy({ where: {}, truncate: true, cascade: true });
