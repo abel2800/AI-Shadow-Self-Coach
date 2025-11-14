@@ -24,9 +24,14 @@
     "backup:verify": "node scripts/backup-manager.js verify",
     "restore": "node scripts/restore-database.js",
     "seed": "node scripts/seed.js",
+    "seed:test": "node scripts/seed-test-data.js",
     "db:sync": "node scripts/sync-database.js",
     "db:create-tables": "node scripts/create-tables.js",
-    "db:create-mood-table": "node scripts/create-mood-table.js"
+    "db:create-mood-table": "node scripts/create-mood-table.js",
+    "db:reset": "node scripts/reset-database.js",
+    "health": "node scripts/health-check.js",
+    "docs:generate": "node scripts/generate-api-docs.js",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [
     "ai",
