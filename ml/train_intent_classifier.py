@@ -39,17 +39,31 @@ INTENT_LABELS = [
 
 def load_training_data():
     """Load and prepare training data"""
-    with open('../SEED_DIALOGUES.json', 'r') as f:
-        seed_data = json.load(f)
+    # Try to load expanded dialogues first, fall back to seed
+    expanded_file = '../data/SEED_DIALOGUES_EXPANDED.json'
+    seed_file = '../SEED_DIALOGUES.json'
+    
+    data_file = expanded_file if os.path.exists(expanded_file) else seed_file
+    print(f"Loading training data from: {data_file}")
+    
+    with open(data_file, 'r') as f:
+        data = json.load(f)
     
     examples = []
-    for dialogue in seed_data.get('dialogues', []):
+    for dialogue in data.get('dialogues', []):
         for message in dialogue.get('messages', []):
             if message.get('role') == 'assistant':
                 examples.append({
                     'text': message['text'],
                     'intent': message.get('intent', 'other'),
                 })
+    
+    print(f"✅ Loaded {len(examples)} training examples")
+    intent_counts = {}
+    for ex in examples:
+        intent = ex['intent']
+        intent_counts[intent] = intent_counts.get(intent, 0) + 1
+    print(f"   Intent distribution: {intent_counts}")
     
     return examples
 
