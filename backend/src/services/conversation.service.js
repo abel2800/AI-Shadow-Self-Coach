@@ -4,6 +4,7 @@ const responseFilter = require('../utils/responseFilter');
 const vectorStoreService = require('./vectorstore.service');
 const abTestService = require('./ab-test.service');
 const mlModelService = require('./ml-model.service');
+const consentService = require('./consent.service');
 const logger = require('../utils/logger');
 
 // System prompt for Ari persona
