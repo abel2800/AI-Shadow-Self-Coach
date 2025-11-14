@@ -185,6 +185,7 @@ async function getConsentStatistics(consentType = 'research') {
     const usersWithConsent = activeConsents.length;
 
     // Get consent rate over time
+    const { sequelize } = require('../config/database');
     const consentsByDate = await Consent.findAll({
       where: {
         consent_type: consentType
