@@ -115,7 +115,7 @@ class WebSocketService {
   async handleSessionMessage(ws, userId, sessionId, messageText) {
     try {
       // Check safety first
-      const safetyCheck = await safetyService.checkMessage(messageText);
+      const safetyCheck = await safetyService.checkRisk(messageText);
       
       if (safetyCheck.risk_level === 'high') {
         ws.send(JSON.stringify({
