@@ -48,6 +48,8 @@ __pycache__/
 ml/models/*.pt
 ml/models/*.pkl
 ml/models/*.h5
+ml/models/**/*
+!ml/models/.gitkeep
 
 # Secrets
 *.pem

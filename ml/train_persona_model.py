@@ -41,9 +41,16 @@ Tone Guidelines:
 
 def prepare_training_data():
     """Prepare training data in OpenAI format"""
-    print("🔄 Loading seed dialogues...")
+    print("🔄 Loading training dialogues...")
     
-    with open(SEED_DIALOGUES_PATH, 'r') as f:
+    # Try to load expanded dialogues first, fall back to seed
+    expanded_file = '../data/SEED_DIALOGUES_EXPANDED.json'
+    seed_file = SEED_DIALOGUES_PATH
+    
+    data_file = expanded_file if os.path.exists(expanded_file) else seed_file
+    print(f"   Using: {data_file}")
+    
+    with open(data_file, 'r') as f:
         seed_data = json.load(f)
     
     training_examples = []

@@ -28,13 +28,20 @@ TARGET_RECALL = 0.98
 
 def load_training_data():
     """Load and prepare training data"""
-    # Load seed dialogues
-    with open('../SEED_DIALOGUES.json', 'r') as f:
-        seed_data = json.load(f)
+    examples = []
+    
+    # Try to load expanded dialogues first, fall back to seed
+    expanded_file = '../data/SEED_DIALOGUES_EXPANDED.json'
+    seed_file = '../SEED_DIALOGUES.json'
+    
+    data_file = expanded_file if os.path.exists(expanded_file) else seed_file
+    
+    print(f"Loading training data from: {data_file}")
+    with open(data_file, 'r') as f:
+        data = json.load(f)
     
     # Extract messages and labels
-    examples = []
-    for dialogue in seed_data.get('dialogues', []):
+    for dialogue in data.get('dialogues', []):
         for message in dialogue.get('messages', []):
             if message.get('role') == 'user':
                 examples.append({
@@ -42,8 +49,34 @@ def load_training_data():
                     'risk_level': message.get('risk_level', 'none'),
                 })
     
-    # Add high-risk examples (synthetic or from datasets)
-    # TODO: Add more high-risk examples to reach 500+ total
+    # Add synthetic high-risk examples if needed
+    high_risk_count = sum(1 for e in examples if e['risk_level'] == 'high')
+    if high_risk_count < 50:
+        print(f"⚠️  Only {high_risk_count} high-risk examples found. Adding synthetic examples...")
+        # Add synthetic high-risk examples
+        high_risk_examples = [
+            "I want to kill myself.",
+            "I'm going to end it all.",
+            "I don't want to live anymore.",
+            "I'm planning to hurt myself.",
+            "I think about suicide every day.",
+            "I have a plan to end my life.",
+            "I'm going to overdose.",
+            "I want to die.",
+            "I'm going to jump off a bridge.",
+            "I can't go on like this anymore."
+        ]
+        for text in high_risk_examples:
+            examples.append({
+                'text': text,
+                'risk_level': 'high'
+            })
+    
+    print(f"✅ Loaded {len(examples)} training examples")
+    print(f"   High-risk: {sum(1 for e in examples if e['risk_level'] == 'high')}")
+    print(f"   Medium-risk: {sum(1 for e in examples if e['risk_level'] == 'medium')}")
+    print(f"   Low-risk: {sum(1 for e in examples if e['risk_level'] == 'low')}")
+    print(f"   None: {sum(1 for e in examples if e['risk_level'] == 'none')}")
     
     return examples
 
