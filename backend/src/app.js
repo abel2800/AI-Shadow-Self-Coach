@@ -22,6 +22,7 @@ const mlModelRoutes = require('./routes/ml-model.routes');
 const abTestRoutes = require('./routes/ab-test.routes');
 const consentRoutes = require('./routes/consent.routes');
 const betaRoutes = require('./routes/beta.routes');
+const adminRoutes = require('./routes/admin.routes');
 const swaggerRoutes = require('./routes/swagger.routes');
 
 // Import middleware
@@ -96,6 +97,7 @@ app.use('/api/v1/ml-models', mlModelRoutes);
 app.use('/api/v1/ab-tests', abTestRoutes);
 app.use('/api/v1/consent', consentRoutes);
 app.use('/api/v1/beta', betaRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // 404 handler
 app.use((req, res) => {
