@@ -75,11 +75,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Step 6: Analyze results
+Write-Host ""
+Write-Host "📊 Step 6: Analyzing training results..." -ForegroundColor Yellow
+python "$SCRIPT_DIR\analyze_training_results.py"
+
+# Step 7: Test model inference
+Write-Host ""
+Write-Host "🧪 Step 7: Testing model inference..." -ForegroundColor Yellow
+python "$SCRIPT_DIR\test_model_inference.py"
+
 Write-Host ""
 Write-Host "✅ Training pipeline complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "📋 Next Steps:" -ForegroundColor Cyan
-Write-Host "   1. Review model performance"
-Write-Host "   2. Deploy models to backend"
-Write-Host "   3. Test in staging environment"
+Write-Host "   1. Review model performance (see analysis above)"
+Write-Host "   2. Export to ONNX: python export_to_onnx.py"
+Write-Host "   3. Deploy models to backend"
+Write-Host "   4. Test in staging environment"
 

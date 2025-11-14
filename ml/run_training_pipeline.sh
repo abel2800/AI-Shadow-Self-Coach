@@ -74,11 +74,22 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Step 6: Analyze results
+echo ""
+echo "📊 Step 6: Analyzing training results..."
+python "$SCRIPT_DIR/analyze_training_results.py"
+
+# Step 7: Test model inference
+echo ""
+echo "🧪 Step 7: Testing model inference..."
+python "$SCRIPT_DIR/test_model_inference.py"
+
 echo ""
 echo "✅ Training pipeline complete!"
 echo ""
 echo "📋 Next Steps:"
-echo "   1. Review model performance"
-echo "   2. Deploy models to backend"
-echo "   3. Test in staging environment"
+echo "   1. Review model performance (see analysis above)"
+echo "   2. Export to ONNX: python export_to_onnx.py"
+echo "   3. Deploy models to backend"
+echo "   4. Test in staging environment"
 
