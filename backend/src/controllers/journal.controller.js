@@ -52,7 +52,7 @@ exports.listEntries = async (req, res, next) => {
         summary: session.summary?.text || '',
         tags: session.summary?.tags || [],
         insights: session.summary?.insights || [],
-        highlights: [] // TODO: Implement highlights
+        highlights: session.summary?.highlights || []
       })),
       pagination: {
         total: filteredSessions.length,

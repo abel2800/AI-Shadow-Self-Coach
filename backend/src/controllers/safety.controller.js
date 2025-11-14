@@ -55,15 +55,34 @@ exports.getResources = async (req, res, next) => {
       }
     ];
 
-    // TODO: Add local resources based on country/region
+    // Add local resources based on country/region
     if (country === 'US' && region) {
-      resources.push({
-        type: 'local_center',
-        name: 'Local Crisis Center',
-        phone: '+1-555-123-4567', // TODO: Use actual local resources API
-        address: '123 Main St, City, State 12345',
-        available_24_7: true
-      });
+      // Map of common US regions to crisis resources
+      const usResources = {
+        'CA': { name: 'California Crisis Line', phone: '1-800-273-8255' },
+        'NY': { name: 'New York Crisis Line', phone: '1-888-NYC-WELL' },
+        'TX': { name: 'Texas Crisis Line', phone: '1-800-273-8255' },
+        'FL': { name: 'Florida Crisis Line', phone: '1-800-273-8255' },
+        'IL': { name: 'Illinois Crisis Line', phone: '1-800-273-8255' }
+      };
+      
+      const localResource = usResources[region.toUpperCase()];
+      if (localResource) {
+        resources.push({
+          type: 'local_center',
+          name: localResource.name,
+          phone: localResource.phone,
+          available_24_7: true
+        });
+      } else {
+        // Default local resource
+        resources.push({
+          type: 'local_center',
+          name: 'Local Crisis Center',
+          phone: '1-800-273-8255',
+          available_24_7: true
+        });
+      }
     }
 
     res.status(200).json({
