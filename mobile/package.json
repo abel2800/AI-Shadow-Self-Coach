@@ -8,6 +8,11 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
+    "test:e2e": "detox test",
+    "test:e2e:ios": "detox test --configuration ios.sim.debug",
+    "test:e2e:android": "detox test --configuration android.emu.debug",
+    "build:e2e:ios": "detox build --configuration ios.sim.debug",
+    "build:e2e:android": "detox build --configuration android.emu.debug",
     "lint": "eslint .",
     "postinstall": "cd ios && pod install"
   },
@@ -34,6 +39,8 @@
     "crypto-js": "^4.2.0"
   },
   "devDependencies": {
+    "detox": "^20.14.0",
+    "@types/detox": "^20.0.0",
     "@babel/core": "^7.23.5",
     "@babel/preset-env": "^7.23.5",
     "@babel/runtime": "^7.23.5",
