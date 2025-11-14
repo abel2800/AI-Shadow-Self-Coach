@@ -51,6 +51,12 @@ ml/models/*.h5
 ml/models/**/*
 !ml/models/.gitkeep
 
+# Python virtual environments
+ml/venv/
+venv/
+env/
+ENV/
+
 # Secrets
 *.pem
 *.key
