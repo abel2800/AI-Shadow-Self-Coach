@@ -66,3 +66,8 @@ tmp/
 temp/
 *.tmp
 
+# Export files
+backend/exports/
+*.txt
+*.pdf
+

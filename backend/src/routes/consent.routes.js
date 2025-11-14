@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const consentController = require('../controllers/consent.controller');
 const authMiddleware = require('../middleware/auth.middleware');
+const requireAdmin = require('../middleware/admin.middleware');
 const validationMiddleware = require('../middleware/validation.middleware');
 const Joi = require('joi');
 
@@ -131,7 +132,7 @@ router.post('/revoke', consentController.revokeConsent);
  *       200:
  *         description: Consent statistics
  */
-router.get('/statistics', consentController.getConsentStatistics);
+router.get('/statistics', authMiddleware, requireAdmin, consentController.getConsentStatistics);
 
 module.exports = router;
 

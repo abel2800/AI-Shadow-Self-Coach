@@ -131,7 +131,7 @@ exports.revokeConsent = async (req, res, next) => {
  */
 exports.getConsentStatistics = async (req, res, next) => {
   try {
-    // TODO: Add admin check middleware
+    // Admin check is handled by requireAdmin middleware
     const consentType = req.query.type || 'research';
 
     const stats = await consentService.getConsentStatistics(consentType);
