@@ -419,6 +419,13 @@ npm run db:reset            # ⚠️ Reset (dev only)
 
 ---
 
+## 📄 Legal Documentation
+
+- **[Privacy Policy](docs/PRIVACY_POLICY.md)**: How we collect, use, and protect your data
+- **[Terms of Service](docs/TERMS_OF_SERVICE.md)**: Terms and conditions for using the service
+
+---
+
 ## 📖 Key Concepts
 
 ### Session Types
