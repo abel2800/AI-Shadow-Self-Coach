@@ -2,6 +2,8 @@ const { getOpenAIClient, isOpenAIConfigured } = require('../config/llm');
 const safetyService = require('./safety.service');
 const responseFilter = require('../utils/responseFilter');
 const vectorStoreService = require('./vectorstore.service');
+const abTestService = require('./ab-test.service');
+const mlModelService = require('./ml-model.service');
 const logger = require('../utils/logger');
 
 // System prompt for Ari persona
@@ -110,8 +112,36 @@ async function generateResponse(userMessage, context) {
 
     let assistantText = completion.choices[0].message.content;
 
-    // 5. Classify intent (simplified - in production, use intent classifier)
-    const intent = classifyIntent(assistantText);
+    // 5. Classify intent (with A/B testing support)
+    let intent;
+    const intentVersionInfo = await abTestService.getModelVersionForUser(
+      context.user_id,
+      'intent_classifier'
+    );
+    
+    if (intentVersionInfo) {
+      // Use A/B tested model version
+      const intentModel = await mlModelService.loadModel(
+        'intent_classifier',
+        intentVersionInfo.version
+      );
+      if (intentModel && intentModel.predict) {
+        const intentResult = await intentModel.predict(assistantText);
+        intent = intentResult || classifyIntent(assistantText);
+        
+        // Record metric
+        await abTestService.recordMetric(
+          intentVersionInfo.test_id,
+          intentVersionInfo.variant,
+          'request'
+        );
+      } else {
+        intent = classifyIntent(assistantText);
+      }
+    } else {
+      // No A/B test, use default
+      intent = classifyIntent(assistantText);
+    }
 
     // 6. Filter response (hard constraints)
     const filterResult = responseFilter.filter(
