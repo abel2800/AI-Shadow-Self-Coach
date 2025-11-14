@@ -6,6 +6,7 @@ const Mood = require('./Mood');
 const ABTest = require('./ABTest');
 const ABTestAssignment = require('./ABTestAssignment');
 const Consent = require('./Consent');
+const SafetyCheckIn = require('./SafetyCheckIn');
 
 // Initialize associations
 require('./Session'); // This will set up associations
@@ -13,6 +14,7 @@ require('./Message'); // This will set up associations
 require('./Mood'); // This will set up associations
 require('./ABTestAssignment'); // This will set up associations
 require('./Consent'); // This will set up associations
+require('./SafetyCheckIn'); // This will set up associations
 
 module.exports = {
   User,
@@ -21,6 +23,7 @@ module.exports = {
   Mood,
   ABTest,
   ABTestAssignment,
-  Consent
+  Consent,
+  SafetyCheckIn
 };
 

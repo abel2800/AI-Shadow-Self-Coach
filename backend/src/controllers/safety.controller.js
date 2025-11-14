@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const { SafetyCheckIn } = require('../models');
 
 // Submit safety check-in
 exports.submitCheckIn = async (req, res, next) => {
@@ -17,17 +18,24 @@ exports.submitCheckIn = async (req, res, next) => {
       });
     }
 
-    // TODO: Save check-in to database
-    const check_in_id = uuidv4();
-
     // Schedule next check-in (24 hours)
     const nextCheckIn = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    res.status(200).json({
-      check_in_id,
+    // Save check-in to database
+    const checkIn = await SafetyCheckIn.create({
+      id: uuidv4(),
+      user_id,
+      session_id: session_id || null,
       safety_status,
-      timestamp: new Date(),
-      next_check_in: nextCheckIn.toISOString()
+      message: message || null,
+      next_check_in: nextCheckIn
+    });
+
+    res.status(200).json({
+      check_in_id: checkIn.id,
+      safety_status: checkIn.safety_status,
+      timestamp: checkIn.created_at,
+      next_check_in: checkIn.next_check_in.toISOString()
     });
   } catch (error) {
     next(error);

@@ -1,6 +1,8 @@
 const { Session, Message } = require('../models');
 const { Op } = require('sequelize');
 const exportService = require('../services/export.service');
+const exportStorage = require('../services/export-storage.service');
+const { v4: uuidv4 } = require('uuid');
 
 // List journal entries
 exports.listEntries = async (req, res, next) => {
@@ -237,15 +239,19 @@ exports.exportEntries = async (req, res, next) => {
       exportData = await exportService.exportMultipleSessions(sessions, 'text');
     }
 
-    // For MVP, return text directly
-    // In production, store file and return download URL
-    res.status(200).json({
-      export_id: require('uuid').v4(),
-      status: 'completed',
-      format: exportData.format,
-      filename: exportData.filename,
-      content: exportData.content, // In production, this would be a download URL
-      size_bytes: Buffer.byteLength(exportData.content, 'utf8')
+    // Store export file
+    const exportId = uuidv4();
+    const storedExport = await exportStorage.storeExport(
+      exportId,
+      exportData.content,
+      format,
+      { filename: exportData.filename, user_id }
+    );
+
+    res.status(202).json({
+      export_id: storedExport.export_id,
+      status: 'processing',
+      estimated_completion: new Date(Date.now() + 5000).toISOString() // 5 seconds
     });
   } catch (error) {
     next(error);
@@ -256,14 +262,37 @@ exports.exportEntries = async (req, res, next) => {
 exports.getExportStatus = async (req, res, next) => {
   try {
     const { export_id } = req.params;
+    const user_id = req.user.id;
 
-    // TODO: Implement export status check
+    const exportData = exportStorage.getExport(export_id);
+
+    if (!exportData) {
+      return res.status(404).json({
+        error: {
+          code: 'EXPORT_NOT_FOUND',
+          message: 'Export not found or expired'
+        }
+      });
+    }
+
+    // Verify user owns this export
+    if (exportData.user_id !== user_id) {
+      return res.status(403).json({
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Access denied'
+        }
+      });
+    }
+
     res.status(200).json({
-      export_id,
-      status: 'completed',
+      export_id: exportData.export_id,
+      status: exportData.status,
       download_url: `/api/v1/journal/export/${export_id}/download`,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      file_size_bytes: 0
+      expires_at: exportData.expires_at.toISOString(),
+      file_size_bytes: exportData.file_size_bytes,
+      format: exportData.format,
+      filename: exportData.filename
     });
   } catch (error) {
     next(error);
@@ -274,9 +303,46 @@ exports.getExportStatus = async (req, res, next) => {
 exports.downloadExport = async (req, res, next) => {
   try {
     const { export_id } = req.params;
+    const user_id = req.user.id;
 
-    // TODO: Implement file download
-    res.status(200).send('Export file content');
+    const exportData = exportStorage.getExport(export_id);
+
+    if (!exportData) {
+      return res.status(404).json({
+        error: {
+          code: 'EXPORT_NOT_FOUND',
+          message: 'Export not found or expired'
+        }
+      });
+    }
+
+    // Verify user owns this export
+    if (exportData.user_id !== user_id) {
+      return res.status(403).json({
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Access denied'
+        }
+      });
+    }
+
+    const fileContent = await exportStorage.getExportContent(export_id);
+
+    if (!fileContent) {
+      return res.status(404).json({
+        error: {
+          code: 'EXPORT_NOT_FOUND',
+          message: 'Export file not found'
+        }
+      });
+    }
+
+    // Set headers for file download
+    res.setHeader('Content-Type', exportData.format === 'pdf' ? 'application/pdf' : 'text/plain');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileContent.filename}"`);
+    res.setHeader('Content-Length', exportData.file_size_bytes);
+
+    res.status(200).send(fileContent.content);
   } catch (error) {
     next(error);
   }
