@@ -99,7 +99,7 @@ exports.getEntry = async (req, res, next) => {
         intent: msg.intent,
         timestamp: msg.timestamp
       })),
-      highlights: [] // TODO: Implement highlights
+      highlights: session.summary?.highlights || []
     });
   } catch (error) {
     next(error);
