@@ -15,5 +15,14 @@ router.get('/resources', safetyController.getResources);
 // Request therapist referral
 router.post('/referral', safetyController.requestReferral);
 
+// Get referral status
+router.get('/referral/:referral_id', safetyController.getReferralStatus);
+
+// List user referrals
+router.get('/referrals', safetyController.listReferrals);
+
+// Cancel referral
+router.delete('/referral/:referral_id', safetyController.cancelReferral);
+
 module.exports = router;
 

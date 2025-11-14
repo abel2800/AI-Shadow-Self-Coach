@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { SafetyCheckIn } = require('../models');
+const therapistReferralService = require('../services/therapist-referral.service');
 
 // Submit safety check-in
 exports.submitCheckIn = async (req, res, next) => {
@@ -111,15 +112,126 @@ exports.requestReferral = async (req, res, next) => {
     const { preferences, consent_for_contact } = req.body;
     const user_id = req.user.id;
 
-    // TODO: Implement therapist referral service
-    const referral_id = uuidv4();
+    // Validate preferences structure
+    if (preferences && typeof preferences !== 'object') {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_INVALID_FORMAT',
+          message: 'Preferences must be an object'
+        }
+      });
+    }
 
-    res.status(200).json({
-      referral_id,
-      status: 'processing',
-      estimated_response: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    // Create referral
+    const referral = await therapistReferralService.createReferral(
+      user_id,
+      preferences,
+      consent_for_contact
+    );
+
+    res.status(201).json({
+      referral_id: referral.id,
+      status: referral.status,
+      estimated_response: referral.estimated_response.toISOString(),
+      created_at: referral.created_at
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// Get referral status
+exports.getReferralStatus = async (req, res, next) => {
+  try {
+    const { referral_id } = req.params;
+    const user_id = req.user.id;
+
+    const referral = await therapistReferralService.getReferral(referral_id, user_id);
+
+    if (!referral) {
+      return res.status(404).json({
+        error: {
+          code: 'REFERRAL_NOT_FOUND',
+          message: 'Referral not found'
+        }
+      });
+    }
+
+    res.status(200).json({
+      referral_id: referral.id,
+      status: referral.status,
+      preferences: referral.preferences,
+      consent_for_contact: referral.consent_for_contact,
+      matched_therapist: referral.matched_therapist_info,
+      estimated_response: referral.estimated_response?.toISOString(),
+      responded_at: referral.responded_at?.toISOString(),
+      created_at: referral.created_at,
+      updated_at: referral.updated_at
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// List user referrals
+exports.listReferrals = async (req, res, next) => {
+  try {
+    const user_id = req.user.id;
+    const { limit = 10, offset = 0 } = req.query;
+
+    const result = await therapistReferralService.getUserReferrals(
+      user_id,
+      parseInt(limit),
+      parseInt(offset)
+    );
+
+    res.status(200).json({
+      referrals: result.rows.map(referral => ({
+        referral_id: referral.id,
+        status: referral.status,
+        matched_therapist: referral.matched_therapist_info,
+        estimated_response: referral.estimated_response?.toISOString(),
+        created_at: referral.created_at
+      })),
+      total: result.count,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Cancel referral
+exports.cancelReferral = async (req, res, next) => {
+  try {
+    const { referral_id } = req.params;
+    const user_id = req.user.id;
+
+    const referral = await therapistReferralService.cancelReferral(referral_id, user_id);
+
+    res.status(200).json({
+      referral_id: referral.id,
+      status: referral.status,
+      message: 'Referral cancelled successfully'
+    });
+  } catch (error) {
+    if (error.message === 'Referral not found') {
+      return res.status(404).json({
+        error: {
+          code: 'REFERRAL_NOT_FOUND',
+          message: error.message
+        }
+      });
+    }
+    if (error.message.includes('Cannot cancel')) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_OPERATION',
+          message: error.message
+        }
+      });
+    }
     next(error);
   }
 };
